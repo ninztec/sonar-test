@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        // Define Maven tool by name as configured in Jenkins
+        maven 'Maven'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,15 +14,21 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                // Use 'withMaven' step to run Maven commands
+                withMaven(maven: 'Maven) {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                // Define SonarQube scanner configuration
-                withSonarQubeEnv('Sonarqube') {
-                    sh '''
-                        # Assuming your project uses Maven for build
-                        mvn clean install
-                        mvn sonar:sonar -Dsonar.projectKey=demo-project -Dsonar.sources=src
-                    '''
+                // Use 'withMaven' to ensure the analysis uses the same Maven tool
+                withMaven(maven: 'Maven') {
+                    // Run SonarQube analysis
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=demo-project -Dsonar.sources=src'
                 }
             }
         }
@@ -27,10 +38,11 @@ pipeline {
         always {
             // Publish results to SonarQube dashboard
             script {
-                def scannerHome = tool name: 'Sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                withSonarQubeEnv('Sonarqube') {
-                    // Publish results to SonarQube dashboard
-                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src"
+                // Retrieve Maven tool installation for SonarQube scanner
+                def scannerHome = tool name: 'Maven', type: 'maven'
+                // Run SonarQube scanner using the same Maven installation
+                withMaven(maven: 'Maven') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=demo-project -Dsonar.sources=src"
                 }
             }
         }
