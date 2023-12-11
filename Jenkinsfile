@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         // Define Maven tool by name as configured in Jenkins
-        maven 'your_maven_installation_name'
+        maven 'Maven'
     }
 
     stages {
@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     // Use 'tool' step to access the configured Maven tool
-                    def mvnHome = tool name: 'your_maven_installation_name', type: 'maven'
+                    def mvnHome = tool name: 'Maven', type: 'maven'
                     // Execute the Maven command using the configured tool
                     def mvnVersion = sh(script: "${mvnHome}/bin/mvn --version", returnStdout: true).trim()
                     echo "Maven version: ${mvnVersion}"
