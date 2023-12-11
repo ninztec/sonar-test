@@ -1,21 +1,17 @@
 pipeline {
     agent any
 
-    // Define Maven tool by name as configured in Jenkins
-    tools {
-        maven 'Maven'
-    }
-
     stages {
-        stage('Build') {
+        stage('Check Maven Version') {
             steps {
-                // Use 'withMaven' step to run Maven commands
-                withMaven(maven: 'Maven') {
-                    // Execute a simple Maven command, like 'mvn --version'
-                    sh 'mvn --version'
+                script {
+                    // Execute a simple Maven command to display the version
+                    def mvnVersion = sh(script: 'mvn --version', returnStdout: true).trim()
+                    echo "Maven version: ${mvnVersion}"
                 }
             }
         }
     }
 }
+
 
