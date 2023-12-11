@@ -1,12 +1,38 @@
-node {
-    stage('SCM') {
-        checkout scm
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your code repository
+                checkout scm
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                // Define SonarQube scanner configuration
+                withSonarQubeEnv('Sonarqube') {
+                    sh '''
+                        # Assuming your project uses Maven for build
+                        mvn clean install
+                        mvn sonar:sonar -Dsonar.projectKey=demo-project -Dsonar.sources=src
+                    '''
+                }
+            }
+        }
     }
 
-    stage('SonarQube Analysis') {
-        def mvn = tool 'Maven';
-        withSonarQubeEnv() {
-            sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=demo-project -Dsonar.login=squ_fd0942453a2ac12b738874d67e1cc6865b0d8227"
+    post {
+        always {
+            // Publish results to SonarQube dashboard
+            script {
+                def scannerHome = tool name: 'Sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                withSonarQubeEnv('Sonarqube') {
+                    // Publish results to SonarQube dashboard
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src"
+                }
+            }
         }
     }
 }
