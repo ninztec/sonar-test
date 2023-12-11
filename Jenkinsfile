@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {
                     // Define SonarQube scanner configuration
-                    def scannerHome = tool name: 'Sonarqube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    def scannerHome = tool name: 'Sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                     // Run SonarQube analysis using the configured scanner
                     sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=demo-project -Dsonar.sources=src"
                 }
